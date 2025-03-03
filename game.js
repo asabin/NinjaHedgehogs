@@ -629,23 +629,13 @@ function createTouchControls(scene) {
         jumpBtnBg.fillColor = 0x000000;
     });
     
-    // Add touch events for restart button - simplified direct implementation
+    // Add touch events for restart button - ensure proper function call
     restartBtnBg.on('pointerdown', () => {
         // Change color to indicate press
         restartBtnBg.fillColor = 0xFF4444;
         
-        // Direct restart implementation
-        gamePaused = false;
-        player.setPosition(100, 450);
-        player.setVelocity(0, 0);
-        scene.cameras.main.resetFX();
-        gameOverText.setAlpha(0);
-        scene.physics.resume();
-        
-        // If music was playing and stopped, restart it
-        if (bgMusic && !bgMusic.isPlaying) {
-            bgMusic.play();
-        }
+        // Call resetGame function
+        resetGame(scene);
     });
     
     restartBtnBg.on('pointerup', () => {
@@ -656,21 +646,11 @@ function createTouchControls(scene) {
         restartBtnBg.fillColor = 0xFF0000;
     });
     
-    // Make restart button also work with regular text
+    // Ensure restart button text is also interactive
     restartBtn.setInteractive();
     restartBtn.on('pointerdown', () => {
-        // Direct restart implementation
-        gamePaused = false;
-        player.setPosition(100, 450);
-        player.setVelocity(0, 0);
-        scene.cameras.main.resetFX();
-        gameOverText.setAlpha(0);
-        scene.physics.resume();
-        
-        // If music was playing and stopped, restart it
-        if (bgMusic && !bgMusic.isPlaying) {
-            bgMusic.play();
-        }
+        // Call resetGame function
+        resetGame(scene);
     });
     
     // Store references to the buttons in the scene
@@ -689,13 +669,13 @@ function createTouchControls(scene) {
     scene.input.addPointer(3); // Support up to 4 simultaneous touches
 }
 
-// Make sure resetGame function is properly defined and accessible
+// Ensure resetGame function is properly defined
 function resetGame(scene) {
     // Reset game state
     gamePaused = false;
     
     // Reset player position
-    player.setPosition(100, 450);
+    player.setPosition(scene.playerStartX, scene.playerStartY);
     player.setVelocity(0, 0);
     
     // Reset camera
@@ -707,9 +687,31 @@ function resetGame(scene) {
     // Resume physics
     scene.physics.resume();
     
-    // Reset any other game state as needed
+    // Reset score and touched platforms
+    score = 0;
+    touchedPlatforms.clear();
+    touchedPlatforms.add(platforms.getChildren()[0]);
+    scoreText.setText('Platforms: 0');
     
-    // If music was playing and stopped, restart it
+    // Respawn enemies
+    scene.enemies.clear(true, true);
+    scene.platformList.forEach((platform) => {
+        if (platform !== platforms.getChildren()[0] && Math.random() < 0.4) {
+            let enemy = scene.enemies.create(platform.x, platform.y - 40, 'enemy');
+            enemy.setScale(0.1);
+            enemy.setBounce(0);
+            enemy.body.setGravityY(0);
+            enemy.body.setSize(enemy.width * 0.8, enemy.height * 0.8);
+            enemy.body.setOffset(enemy.width * 0.1, enemy.height * 0.2);
+            enemy.platform = platform;
+            enemy.platformLeft = platform.x - (platform.displayWidth / 2) + 20;
+            enemy.platformRight = platform.x + (platform.displayWidth / 2) - 20;
+            enemy.active = false;
+            enemy.setVelocityX(0);
+        }
+    });
+    
+    // Restart background music if needed
     if (bgMusic && !bgMusic.isPlaying) {
         bgMusic.play();
     }
