@@ -294,21 +294,11 @@ function startGame() {
             bgElements.add(dot);
         }
 
-        // Add theme song
-        bgMusic = this.sound.add('theme', {
-            volume: 0.5,
-            loop: true
-        });
-
-        // Add on-screen controls for touch devices
-        if (!this.sys.game.device.input.keyboard) {
-            createTouchControls(this);
-        } else {
-            // Check if it's likely a touch device (like iPad) even if keyboard is detected
-            if (this.sys.game.device.input.touch) {
-                createTouchControls(this);
-            }
-        }
+        // Create background music
+        bgMusic = this.sound.add('theme', { loop: true, volume: 0.5 });
+        
+        // Always create touch controls for mobile compatibility
+        createTouchControls(this);
     }
 
     function hitGround() {
@@ -521,72 +511,117 @@ function startGame() {
 
 // Function to create touch controls
 function createTouchControls(scene) {
-    const buttonStyle = {
-        font: '32px Arial',
-        fill: '#ffffff',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        padding: {
-            x: 20,
-            y: 10
-        }
+    // Create button backgrounds
+    const leftBtnBg = scene.add.rectangle(80, window.innerHeight - 100, 80, 80, 0x000000, 0.7)
+        .setScrollFactor(0)
+        .setDepth(100);
+    
+    const rightBtnBg = scene.add.rectangle(180, window.innerHeight - 100, 80, 80, 0x000000, 0.7)
+        .setScrollFactor(0)
+        .setDepth(100);
+    
+    const jumpBtnBg = scene.add.rectangle(window.innerWidth - 80, window.innerHeight - 100, 80, 80, 0x000000, 0.7)
+        .setScrollFactor(0)
+        .setDepth(100);
+    
+    // Create button text with larger, more visible font
+    const leftBtn = scene.add.text(80, window.innerHeight - 100, '←', {
+        font: '48px Arial',
+        fill: '#ffffff'
+    })
+        .setOrigin(0.5)
+        .setInteractive()
+        .setScrollFactor(0)
+        .setDepth(101);
+    
+    const rightBtn = scene.add.text(180, window.innerHeight - 100, '→', {
+        font: '48px Arial',
+        fill: '#ffffff'
+    })
+        .setOrigin(0.5)
+        .setInteractive()
+        .setScrollFactor(0)
+        .setDepth(101);
+    
+    const jumpBtn = scene.add.text(window.innerWidth - 80, window.innerHeight - 100, '↑', {
+        font: '48px Arial',
+        fill: '#ffffff'
+    })
+        .setOrigin(0.5)
+        .setInteractive()
+        .setScrollFactor(0)
+        .setDepth(101);
+    
+    // Make the button backgrounds interactive as well
+    leftBtnBg.setInteractive();
+    rightBtnBg.setInteractive();
+    jumpBtnBg.setInteractive();
+    
+    // Initialize touch controls if not already done
+    if (!window.touchControls) {
+        window.touchControls = {
+            left: false,
+            right: false,
+            jump: false
+        };
+    }
+    
+    // Add touch events for left button (both text and background)
+    [leftBtn, leftBtnBg].forEach(btn => {
+        btn.on('pointerdown', () => {
+            window.touchControls.left = true;
+            leftBtnBg.fillColor = 0x444444;
+        });
+        btn.on('pointerup', () => {
+            window.touchControls.left = false;
+            leftBtnBg.fillColor = 0x000000;
+        });
+        btn.on('pointerout', () => {
+            window.touchControls.left = false;
+            leftBtnBg.fillColor = 0x000000;
+        });
+    });
+    
+    // Add touch events for right button (both text and background)
+    [rightBtn, rightBtnBg].forEach(btn => {
+        btn.on('pointerdown', () => {
+            window.touchControls.right = true;
+            rightBtnBg.fillColor = 0x444444;
+        });
+        btn.on('pointerup', () => {
+            window.touchControls.right = false;
+            rightBtnBg.fillColor = 0x000000;
+        });
+        btn.on('pointerout', () => {
+            window.touchControls.right = false;
+            rightBtnBg.fillColor = 0x000000;
+        });
+    });
+    
+    // Add touch events for jump button (both text and background)
+    [jumpBtn, jumpBtnBg].forEach(btn => {
+        btn.on('pointerdown', () => {
+            window.touchControls.jump = true;
+            jumpBtnBg.fillColor = 0x444444;
+        });
+        btn.on('pointerup', () => {
+            window.touchControls.jump = false;
+            jumpBtnBg.fillColor = 0x000000;
+        });
+        btn.on('pointerout', () => {
+            window.touchControls.jump = false;
+            jumpBtnBg.fillColor = 0x000000;
+        });
+    });
+    
+    // Store references to the buttons in the scene for potential later use
+    scene.touchButtons = {
+        leftBtn,
+        rightBtn,
+        jumpBtn,
+        leftBtnBg,
+        rightBtnBg,
+        jumpBtnBg
     };
-    
-    // Create left button
-    const leftBtn = scene.add.text(50, window.innerHeight - 100, '←', buttonStyle)
-        .setInteractive()
-        .setScrollFactor(0)
-        .setDepth(100);
-    
-    // Create right button
-    const rightBtn = scene.add.text(150, window.innerHeight - 100, '→', buttonStyle)
-        .setInteractive()
-        .setScrollFactor(0)
-        .setDepth(100);
-    
-    // Create jump button
-    const jumpBtn = scene.add.text(window.innerWidth - 100, window.innerHeight - 100, '↑', buttonStyle)
-        .setInteractive()
-        .setScrollFactor(0)
-        .setDepth(100);
-    
-    // Touch control states
-    window.touchControls = {
-        left: false,
-        right: false,
-        jump: false
-    };
-    
-    // Add touch events for left button
-    leftBtn.on('pointerdown', () => {
-        window.touchControls.left = true;
-    });
-    leftBtn.on('pointerup', () => {
-        window.touchControls.left = false;
-    });
-    leftBtn.on('pointerout', () => {
-        window.touchControls.left = false;
-    });
-    
-    // Add touch events for right button
-    rightBtn.on('pointerdown', () => {
-        window.touchControls.right = true;
-    });
-    rightBtn.on('pointerup', () => {
-        window.touchControls.right = false;
-    });
-    rightBtn.on('pointerout', () => {
-        window.touchControls.right = false;
-    });
-    
-    // Add touch events for jump button
-    jumpBtn.on('pointerdown', () => {
-        window.touchControls.jump = true;
-    });
-    jumpBtn.on('pointerup', () => {
-        window.touchControls.jump = false;
-    });
-    jumpBtn.on('pointerout', () => {
-        window.touchControls.jump = false;
-    });
 }
 
