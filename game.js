@@ -299,6 +299,16 @@ function startGame() {
             volume: 0.5,
             loop: true
         });
+
+        // Add on-screen controls for touch devices
+        if (!this.sys.game.device.input.keyboard) {
+            createTouchControls(this);
+        } else {
+            // Check if it's likely a touch device (like iPad) even if keyboard is detected
+            if (this.sys.game.device.input.touch) {
+                createTouchControls(this);
+            }
+        }
     }
 
     function hitGround() {
@@ -440,17 +450,43 @@ function startGame() {
             }
         }, this);
 
-        if (cursors.right.isDown) {
-            player.setVelocityX(500);
-        } else if (cursors.left.isDown) {
-            player.setVelocityX(-300);
-        } else {
-            player.setVelocityX(0);
-        }
-
-        if (spaceBar.isDown && player.body.touching.down) {
-            player.setVelocityY(-900);
-            this.sound.play('jump');
+        // Handle player movement with keyboard or touch controls
+        if (!gamePaused) {
+            // Check for keyboard or touch controls
+            const leftPressed = cursors.left.isDown || window.touchControls?.left;
+            const rightPressed = cursors.right.isDown || window.touchControls?.right;
+            const jumpPressed = spaceBar.isDown || window.touchControls?.jump;
+            
+            if (leftPressed) {
+                player.setVelocityX(-500);
+                player.flipX = true;
+                
+                // Start music when player moves
+                if (bgMusic && !bgMusic.isPlaying) {
+                    bgMusic.play();
+                }
+            } else if (rightPressed) {
+                player.setVelocityX(500);
+                player.flipX = false;
+                
+                // Start music when player moves
+                if (bgMusic && !bgMusic.isPlaying) {
+                    bgMusic.play();
+                }
+            } else {
+                player.setVelocityX(0);
+            }
+            
+            // Handle jumping with keyboard or touch
+            if (jumpPressed && player.body.touching.down) {
+                player.setVelocityY(-900);
+                this.sound.play('jump');
+                
+                // Start music when player jumps
+                if (bgMusic && !bgMusic.isPlaying) {
+                    bgMusic.play();
+                }
+            }
         }
     }
 
@@ -481,5 +517,76 @@ function startGame() {
 
     // Call this before starting the game
     addFullscreenStyles();
+}
+
+// Function to create touch controls
+function createTouchControls(scene) {
+    const buttonStyle = {
+        font: '32px Arial',
+        fill: '#ffffff',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        padding: {
+            x: 20,
+            y: 10
+        }
+    };
+    
+    // Create left button
+    const leftBtn = scene.add.text(50, window.innerHeight - 100, '←', buttonStyle)
+        .setInteractive()
+        .setScrollFactor(0)
+        .setDepth(100);
+    
+    // Create right button
+    const rightBtn = scene.add.text(150, window.innerHeight - 100, '→', buttonStyle)
+        .setInteractive()
+        .setScrollFactor(0)
+        .setDepth(100);
+    
+    // Create jump button
+    const jumpBtn = scene.add.text(window.innerWidth - 100, window.innerHeight - 100, '↑', buttonStyle)
+        .setInteractive()
+        .setScrollFactor(0)
+        .setDepth(100);
+    
+    // Touch control states
+    window.touchControls = {
+        left: false,
+        right: false,
+        jump: false
+    };
+    
+    // Add touch events for left button
+    leftBtn.on('pointerdown', () => {
+        window.touchControls.left = true;
+    });
+    leftBtn.on('pointerup', () => {
+        window.touchControls.left = false;
+    });
+    leftBtn.on('pointerout', () => {
+        window.touchControls.left = false;
+    });
+    
+    // Add touch events for right button
+    rightBtn.on('pointerdown', () => {
+        window.touchControls.right = true;
+    });
+    rightBtn.on('pointerup', () => {
+        window.touchControls.right = false;
+    });
+    rightBtn.on('pointerout', () => {
+        window.touchControls.right = false;
+    });
+    
+    // Add touch events for jump button
+    jumpBtn.on('pointerdown', () => {
+        window.touchControls.jump = true;
+    });
+    jumpBtn.on('pointerup', () => {
+        window.touchControls.jump = false;
+    });
+    jumpBtn.on('pointerout', () => {
+        window.touchControls.jump = false;
+    });
 }
 
