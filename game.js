@@ -543,7 +543,7 @@ function createTouchControls(scene) {
         .setDepth(1000);
         
     // Add restart button
-    const restartBtnBg = scene.add.rectangle(window.innerWidth - 180, buttonY, 80, 80, 0x000000, 0.7)
+    const restartBtnBg = scene.add.rectangle(window.innerWidth - 180, buttonY, 80, 80, 0xFF0000, 0.7)
         .setScrollFactor(0)
         .setDepth(1000);
     
@@ -629,21 +629,48 @@ function createTouchControls(scene) {
         jumpBtnBg.fillColor = 0x000000;
     });
     
-    // Add touch events for restart button
+    // Add touch events for restart button - simplified direct implementation
     restartBtnBg.on('pointerdown', () => {
-        window.touchControls.restart = true;
-        restartBtnBg.fillColor = 0x444444;
+        // Change color to indicate press
+        restartBtnBg.fillColor = 0xFF4444;
         
-        // Directly call resetGame function when restart button is pressed
-        resetGame(scene);
+        // Direct restart implementation
+        gamePaused = false;
+        player.setPosition(100, 450);
+        player.setVelocity(0, 0);
+        scene.cameras.main.resetFX();
+        gameOverText.setAlpha(0);
+        scene.physics.resume();
+        
+        // If music was playing and stopped, restart it
+        if (bgMusic && !bgMusic.isPlaying) {
+            bgMusic.play();
+        }
     });
+    
     restartBtnBg.on('pointerup', () => {
-        window.touchControls.restart = false;
-        restartBtnBg.fillColor = 0x000000;
+        restartBtnBg.fillColor = 0xFF0000;
     });
+    
     restartBtnBg.on('pointerout', () => {
-        window.touchControls.restart = false;
-        restartBtnBg.fillColor = 0x000000;
+        restartBtnBg.fillColor = 0xFF0000;
+    });
+    
+    // Make restart button also work with regular text
+    restartBtn.setInteractive();
+    restartBtn.on('pointerdown', () => {
+        // Direct restart implementation
+        gamePaused = false;
+        player.setPosition(100, 450);
+        player.setVelocity(0, 0);
+        scene.cameras.main.resetFX();
+        gameOverText.setAlpha(0);
+        scene.physics.resume();
+        
+        // If music was playing and stopped, restart it
+        if (bgMusic && !bgMusic.isPlaying) {
+            bgMusic.play();
+        }
     });
     
     // Store references to the buttons in the scene
