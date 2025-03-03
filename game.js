@@ -511,21 +511,25 @@ function startGame() {
 
 // Function to create touch controls
 function createTouchControls(scene) {
+    // Calculate button positions - place them higher up
+    // Position buttons 150px from the bottom of the screen
+    const buttonY = window.innerHeight - 150;
+    
     // Create button backgrounds
-    const leftBtnBg = scene.add.rectangle(80, window.innerHeight - 100, 80, 80, 0x000000, 0.7)
+    const leftBtnBg = scene.add.rectangle(80, buttonY, 80, 80, 0x000000, 0.7)
         .setScrollFactor(0)
         .setDepth(100);
     
-    const rightBtnBg = scene.add.rectangle(180, window.innerHeight - 100, 80, 80, 0x000000, 0.7)
+    const rightBtnBg = scene.add.rectangle(180, buttonY, 80, 80, 0x000000, 0.7)
         .setScrollFactor(0)
         .setDepth(100);
     
-    const jumpBtnBg = scene.add.rectangle(window.innerWidth - 80, window.innerHeight - 100, 80, 80, 0x000000, 0.7)
+    const jumpBtnBg = scene.add.rectangle(window.innerWidth - 80, buttonY, 80, 80, 0x000000, 0.7)
         .setScrollFactor(0)
         .setDepth(100);
     
     // Create button text with larger, more visible font
-    const leftBtn = scene.add.text(80, window.innerHeight - 100, '←', {
+    const leftBtn = scene.add.text(80, buttonY, '←', {
         font: '48px Arial',
         fill: '#ffffff'
     })
@@ -534,7 +538,7 @@ function createTouchControls(scene) {
         .setScrollFactor(0)
         .setDepth(101);
     
-    const rightBtn = scene.add.text(180, window.innerHeight - 100, '→', {
+    const rightBtn = scene.add.text(180, buttonY, '→', {
         font: '48px Arial',
         fill: '#ffffff'
     })
@@ -543,7 +547,7 @@ function createTouchControls(scene) {
         .setScrollFactor(0)
         .setDepth(101);
     
-    const jumpBtn = scene.add.text(window.innerWidth - 80, window.innerHeight - 100, '↑', {
+    const jumpBtn = scene.add.text(window.innerWidth - 80, buttonY, '↑', {
         font: '48px Arial',
         fill: '#ffffff'
     })
