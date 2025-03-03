@@ -478,6 +478,11 @@ function startGame() {
                 }
             }
         }
+
+        // Handle restart with keyboard or touch
+        if ((this.rKey.isDown || window.touchControls?.restart) && gamePaused) {
+            resetGame(this);
+        }
     }
 
     // Add window resize handler
@@ -512,120 +517,149 @@ function startGame() {
 // Function to create touch controls
 function createTouchControls(scene) {
     // Calculate button positions - place them higher up
-    // Position buttons 150px from the bottom of the screen
     const buttonY = window.innerHeight - 150;
-    
-    // Create button backgrounds
-    const leftBtnBg = scene.add.rectangle(80, buttonY, 80, 80, 0x000000, 0.7)
-        .setScrollFactor(0)
-        .setDepth(100);
-    
-    const rightBtnBg = scene.add.rectangle(180, buttonY, 80, 80, 0x000000, 0.7)
-        .setScrollFactor(0)
-        .setDepth(100);
-    
-    const jumpBtnBg = scene.add.rectangle(window.innerWidth - 80, buttonY, 80, 80, 0x000000, 0.7)
-        .setScrollFactor(0)
-        .setDepth(100);
-    
-    // Create button text with larger, more visible font
-    const leftBtn = scene.add.text(80, buttonY, '←', {
-        font: '48px Arial',
-        fill: '#ffffff'
-    })
-        .setOrigin(0.5)
-        .setInteractive()
-        .setScrollFactor(0)
-        .setDepth(101);
-    
-    const rightBtn = scene.add.text(180, buttonY, '→', {
-        font: '48px Arial',
-        fill: '#ffffff'
-    })
-        .setOrigin(0.5)
-        .setInteractive()
-        .setScrollFactor(0)
-        .setDepth(101);
-    
-    const jumpBtn = scene.add.text(window.innerWidth - 80, buttonY, '↑', {
-        font: '48px Arial',
-        fill: '#ffffff'
-    })
-        .setOrigin(0.5)
-        .setInteractive()
-        .setScrollFactor(0)
-        .setDepth(101);
-    
-    // Make the button backgrounds interactive as well
-    leftBtnBg.setInteractive();
-    rightBtnBg.setInteractive();
-    jumpBtnBg.setInteractive();
     
     // Initialize touch controls if not already done
     if (!window.touchControls) {
         window.touchControls = {
             left: false,
             right: false,
-            jump: false
+            jump: false,
+            restart: false
         };
     }
     
-    // Add touch events for left button (both text and background)
-    [leftBtn, leftBtnBg].forEach(btn => {
-        btn.on('pointerdown', () => {
-            window.touchControls.left = true;
-            leftBtnBg.fillColor = 0x444444;
-        });
-        btn.on('pointerup', () => {
-            window.touchControls.left = false;
-            leftBtnBg.fillColor = 0x000000;
-        });
-        btn.on('pointerout', () => {
-            window.touchControls.left = false;
-            leftBtnBg.fillColor = 0x000000;
-        });
+    // Create button backgrounds with higher depth values
+    const leftBtnBg = scene.add.rectangle(80, buttonY, 80, 80, 0x000000, 0.7)
+        .setScrollFactor(0)
+        .setDepth(1000);
+    
+    const rightBtnBg = scene.add.rectangle(180, buttonY, 80, 80, 0x000000, 0.7)
+        .setScrollFactor(0)
+        .setDepth(1000);
+    
+    const jumpBtnBg = scene.add.rectangle(window.innerWidth - 80, buttonY, 80, 80, 0x000000, 0.7)
+        .setScrollFactor(0)
+        .setDepth(1000);
+        
+    // Add restart button
+    const restartBtnBg = scene.add.rectangle(window.innerWidth - 180, buttonY, 80, 80, 0x000000, 0.7)
+        .setScrollFactor(0)
+        .setDepth(1000);
+    
+    // Create button text with larger, more visible font and higher depth
+    const leftBtn = scene.add.text(80, buttonY, '←', {
+        font: '48px Arial',
+        fill: '#ffffff'
+    })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1001);
+    
+    const rightBtn = scene.add.text(180, buttonY, '→', {
+        font: '48px Arial',
+        fill: '#ffffff'
+    })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1001);
+    
+    const jumpBtn = scene.add.text(window.innerWidth - 80, buttonY, '↑', {
+        font: '48px Arial',
+        fill: '#ffffff'
+    })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1001);
+        
+    // Add restart button text
+    const restartBtn = scene.add.text(window.innerWidth - 180, buttonY, 'R', {
+        font: '48px Arial',
+        fill: '#ffffff'
+    })
+        .setOrigin(0.5)
+        .setScrollFactor(0)
+        .setDepth(1001);
+    
+    // Make all interactive areas larger and more responsive
+    leftBtnBg.setInteractive(new Phaser.Geom.Rectangle(-40, -40, 160, 160), Phaser.Geom.Rectangle.Contains);
+    rightBtnBg.setInteractive(new Phaser.Geom.Rectangle(-40, -40, 160, 160), Phaser.Geom.Rectangle.Contains);
+    jumpBtnBg.setInteractive(new Phaser.Geom.Rectangle(-40, -40, 160, 160), Phaser.Geom.Rectangle.Contains);
+    restartBtnBg.setInteractive(new Phaser.Geom.Rectangle(-40, -40, 160, 160), Phaser.Geom.Rectangle.Contains);
+    
+    // Add touch events for left button
+    leftBtnBg.on('pointerdown', () => {
+        window.touchControls.left = true;
+        leftBtnBg.fillColor = 0x444444;
+    });
+    leftBtnBg.on('pointerup', () => {
+        window.touchControls.left = false;
+        leftBtnBg.fillColor = 0x000000;
+    });
+    leftBtnBg.on('pointerout', () => {
+        window.touchControls.left = false;
+        leftBtnBg.fillColor = 0x000000;
     });
     
-    // Add touch events for right button (both text and background)
-    [rightBtn, rightBtnBg].forEach(btn => {
-        btn.on('pointerdown', () => {
-            window.touchControls.right = true;
-            rightBtnBg.fillColor = 0x444444;
-        });
-        btn.on('pointerup', () => {
-            window.touchControls.right = false;
-            rightBtnBg.fillColor = 0x000000;
-        });
-        btn.on('pointerout', () => {
-            window.touchControls.right = false;
-            rightBtnBg.fillColor = 0x000000;
-        });
+    // Add touch events for right button
+    rightBtnBg.on('pointerdown', () => {
+        window.touchControls.right = true;
+        rightBtnBg.fillColor = 0x444444;
+    });
+    rightBtnBg.on('pointerup', () => {
+        window.touchControls.right = false;
+        rightBtnBg.fillColor = 0x000000;
+    });
+    rightBtnBg.on('pointerout', () => {
+        window.touchControls.right = false;
+        rightBtnBg.fillColor = 0x000000;
     });
     
-    // Add touch events for jump button (both text and background)
-    [jumpBtn, jumpBtnBg].forEach(btn => {
-        btn.on('pointerdown', () => {
-            window.touchControls.jump = true;
-            jumpBtnBg.fillColor = 0x444444;
-        });
-        btn.on('pointerup', () => {
-            window.touchControls.jump = false;
-            jumpBtnBg.fillColor = 0x000000;
-        });
-        btn.on('pointerout', () => {
-            window.touchControls.jump = false;
-            jumpBtnBg.fillColor = 0x000000;
-        });
+    // Add touch events for jump button
+    jumpBtnBg.on('pointerdown', () => {
+        window.touchControls.jump = true;
+        jumpBtnBg.fillColor = 0x444444;
+    });
+    jumpBtnBg.on('pointerup', () => {
+        window.touchControls.jump = false;
+        jumpBtnBg.fillColor = 0x000000;
+    });
+    jumpBtnBg.on('pointerout', () => {
+        window.touchControls.jump = false;
+        jumpBtnBg.fillColor = 0x000000;
     });
     
-    // Store references to the buttons in the scene for potential later use
+    // Add touch events for restart button
+    restartBtnBg.on('pointerdown', () => {
+        window.touchControls.restart = true;
+        restartBtnBg.fillColor = 0x444444;
+        // Trigger restart immediately
+        if (gamePaused) {
+            resetGame(scene);
+        }
+    });
+    restartBtnBg.on('pointerup', () => {
+        window.touchControls.restart = false;
+        restartBtnBg.fillColor = 0x000000;
+    });
+    restartBtnBg.on('pointerout', () => {
+        window.touchControls.restart = false;
+        restartBtnBg.fillColor = 0x000000;
+    });
+    
+    // Store references to the buttons in the scene
     scene.touchButtons = {
         leftBtn,
         rightBtn,
         jumpBtn,
+        restartBtn,
         leftBtnBg,
         rightBtnBg,
-        jumpBtnBg
+        jumpBtnBg,
+        restartBtnBg
     };
+    
+    // Enable multi-touch
+    scene.input.addPointer(3); // Support up to 4 simultaneous touches
 }
 
