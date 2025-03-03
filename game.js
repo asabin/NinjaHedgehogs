@@ -633,10 +633,9 @@ function createTouchControls(scene) {
     restartBtnBg.on('pointerdown', () => {
         window.touchControls.restart = true;
         restartBtnBg.fillColor = 0x444444;
-        // Trigger restart immediately
-        if (gamePaused) {
-            resetGame(scene);
-        }
+        
+        // Directly call resetGame function when restart button is pressed
+        resetGame(scene);
     });
     restartBtnBg.on('pointerup', () => {
         window.touchControls.restart = false;
@@ -661,5 +660,31 @@ function createTouchControls(scene) {
     
     // Enable multi-touch
     scene.input.addPointer(3); // Support up to 4 simultaneous touches
+}
+
+// Make sure resetGame function is properly defined and accessible
+function resetGame(scene) {
+    // Reset game state
+    gamePaused = false;
+    
+    // Reset player position
+    player.setPosition(100, 450);
+    player.setVelocity(0, 0);
+    
+    // Reset camera
+    scene.cameras.main.resetFX();
+    
+    // Hide game over text
+    gameOverText.setAlpha(0);
+    
+    // Resume physics
+    scene.physics.resume();
+    
+    // Reset any other game state as needed
+    
+    // If music was playing and stopped, restart it
+    if (bgMusic && !bgMusic.isPlaying) {
+        bgMusic.play();
+    }
 }
 
